@@ -1,0 +1,35 @@
+services:
+  db:
+    container_name: football-iq-db
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: football_iq
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d football_iq"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    container_name: football-iq-web
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/football_iq?connect_timeout=15"
+      FOOTBALL_DATA_KEY: "${FOOTBALL_DATA_KEY}"
+      ODDS_API_KEY: "${ODDS_API_KEY}"
+    ports:
+      - "3000:3000"
+
+volumes:
+  db_data:
