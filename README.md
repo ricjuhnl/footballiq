@@ -40,7 +40,7 @@ This is the easiest way to run the app. It starts both the web app and a Postgre
 
 ### 1. Install Docker
 
-Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) (macOS / Windows) or Docker Engine + the Compose plugin (Linux).
+Install Docker + the Compose plugin.
 
 ### 2. Provide your API keys
 
@@ -55,7 +55,7 @@ Then open `.env` and fill in `FOOTBALL_DATA_KEY` and `ODDS_API_KEY`. Leave `DATA
 ### 3. Build and start
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
 The first build takes a few minutes. When it finishes, open:
@@ -63,8 +63,6 @@ The first build takes a few minutes. When it finishes, open:
 **http://localhost:3000**
 
 ### 4. Stop
-
-Press `Ctrl+C`, then (to remove the containers):
 
 ```bash
 docker compose down
