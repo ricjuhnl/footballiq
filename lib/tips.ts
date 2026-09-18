@@ -4,7 +4,7 @@ import { generatePrediction } from './predictions';
 
 export const TIP_MIN_PCT = 58; // selection needs prediction probability higher than this (%)
 export const TIP_MIN_ODDS = 1.4; // selection needs decimal odds higher than this
-export const TIP_MAX_HOURS_AHEAD = 7 * 24; // only the first upcoming matchday (rolling 7-day window)
+export const TIP_MAX_HOURS_AHEAD = 3 * 24; // only the first upcoming matchday (rolling 3-day window)
 export const TIP_MAX_SELECTIONS = 12; // keep only the top-N picks across all leagues
 export const TIP_MAX_PER_GROUP = 3; // each separate tip carries max 2-3 selections
 export const TIP_MIN_PER_GROUP = 2;
