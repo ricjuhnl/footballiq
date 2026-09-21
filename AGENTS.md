@@ -45,5 +45,9 @@ for six European leagues. Tailwind + Radix/shadcn. No test suite, no CI — veri
   silently never hydrates. Add per-checkout hosts via `next.config.user.json`
   (`{ "allowedDevOrigins": [...] }`, merged into the base list); never use a wildcard.
 - `instrumentation-client.js` is system-managed — do not edit, rename, or delete.
-- Docker build sets `NEXT_OUTPUT_MODE=standalone`, which also changes `outputFileTracingRoot`
-  in `next.config.js` to the parent directory.
+- Docker build sets `NEXT_OUTPUT_MODE=standalone`, which retargets `outputFileTracingRoot` in
+  `next.config.js` to the parent directory, so the standalone output nests the app under
+  `nextjs_space/`. Keep that nesting in the Dockerfile (`WORKDIR /app/nextjs_space`) — Turbopack
+  resolves `@prisma/client` via a hashed symlink in `.next/node_modules` pointing at
+  `nextjs_space/node_modules`, and flattening the tree breaks it ("Cannot find module
+  '@prisma/client-<hash>'", 500s on every API route).
