@@ -24,11 +24,17 @@ export default function RecentResults({ leagueId }: { leagueId: number }) {
   const [fixtures, setFixtures] = useState<Fixture[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [prevLeagueId, setPrevLeagueId] = useState(leagueId);
+  if (prevLeagueId !== leagueId) {
+    // Reset for the new league during render (react.dev "adjust state when props change"),
+    // so the effect body stays free of synchronous setState.
+    setPrevLeagueId(leagueId);
+    setLoading(true);
+    setError(null);
+  }
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
 
     fetch(`/api/fixtures/${leagueId}?type=recent`)
       .then((r) => r.json())

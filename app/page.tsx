@@ -1,17 +1,3 @@
-declare module 'react/jsx-runtime' {
-  export const Fragment: any;
-  export function jsx(type: any, props?: any, key?: any): any;
-  export function jsxs(type: any, props?: any, key?: any): any;
-}
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      [elemName: string]: any;
-    }
-  }
-}
-
 import Header from './components/header';
 import LeagueTabs from './components/league-tabs';
 import { Brain, BarChart3, Zap } from 'lucide-react';

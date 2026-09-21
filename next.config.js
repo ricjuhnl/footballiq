@@ -30,8 +30,17 @@ const userConfigAllowedKeys = { skipTrailingSlashRedirect: 'boolean', trailingSl
 if (fs.existsSync(userConfigPath)) {
   const userConfig = JSON.parse(fs.readFileSync(userConfigPath, 'utf8'));
   for (const key of Object.keys(userConfig)) {
+    if (key === 'allowedDevOrigins') {
+      // Per-checkout dev hosts (fork preview subdomains, LAN IPs) are added here instead of
+      // editing the shared base list above. Enumerated hosts only — never a wildcard.
+      if (!Array.isArray(userConfig[key]) || !userConfig[key].every((h) => typeof h === 'string')) {
+        throw new Error('next.config.user.json: allowedDevOrigins must be an array of strings.');
+      }
+      nextConfig.allowedDevOrigins = [...new Set([...nextConfig.allowedDevOrigins, ...userConfig[key]])];
+      continue;
+    }
     if (typeof userConfig[key] !== userConfigAllowedKeys[key]) {
-      throw new Error(`next.config.user.json: unsupported override "${key}". Supported boolean keys: skipTrailingSlashRedirect, trailingSlash.`);
+      throw new Error(`next.config.user.json: unsupported override "${key}". Supported boolean keys: skipTrailingSlashRedirect, trailingSlash; array key: allowedDevOrigins.`);
     }
     nextConfig[key] = userConfig[key];
   }

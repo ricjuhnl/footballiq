@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { CardSkeleton } from './loading-skeleton';
+import { CardSkeleton } from '@/app/components/loading-skeleton';
 import { AlertCircle, Sparkles, CalendarDays } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { SafeDate, SafeTime } from '@/components/safe-format';

@@ -15,4 +15,9 @@ export default defineConfig([
       '@typescript-eslint/no-unused-vars': 'warn',
     },
   },
+  {
+    // next.config.js is Node CommonJS loaded by Next itself — require() is the idiom there.
+    files: ['next.config.js'],
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
+  },
 ]);

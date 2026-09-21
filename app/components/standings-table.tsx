@@ -23,11 +23,17 @@ export default function StandingsTable({ leagueId }: { leagueId: number }) {
   const [currentMatchday, setCurrentMatchday] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [prevLeagueId, setPrevLeagueId] = useState(leagueId);
+  if (prevLeagueId !== leagueId) {
+    // Reset for the new league during render (react.dev "adjust state when props change"),
+    // so the effect body stays free of synchronous setState.
+    setPrevLeagueId(leagueId);
+    setLoading(true);
+    setError(null);
+  }
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
 
     fetch(`/api/league/${leagueId}`)
       .then((r) => r.json())

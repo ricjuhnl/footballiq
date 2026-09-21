@@ -7,6 +7,7 @@ out/
 build/
 dist/
 .vercel/
+tsconfig.tsbuildinfo
 
 # Package manager (commented out because yarn.lock should be committed)
 # yarn.lock
@@ -36,6 +37,9 @@ Thumbs.db
 
 # Docker
 docker-compose.override.yml
+
+# Next.js per-checkout overrides (hosts etc. must stay out of shared config)
+next.config.user.json
 
 # Prisma
 prisma/migrations/
