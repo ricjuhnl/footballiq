@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: football_iq
     ports:
       - "5432:5432"
@@ -25,7 +25,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: "postgresql://postgres:postgres@db:5432/football_iq?connect_timeout=15"
+      DATABASE_URL: "postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/football_iq?connect_timeout=15"
       FOOTBALL_DATA_KEY: "${FOOTBALL_DATA_KEY}"
       ODDS_API_KEY: "${ODDS_API_KEY}"
     ports:

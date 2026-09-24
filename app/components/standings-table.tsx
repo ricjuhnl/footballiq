@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { TableSkeleton } from './loading-skeleton';
-import { AlertCircle, ChevronUp, ChevronDown, Minus } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Info } from 'lucide-react';
@@ -36,7 +36,10 @@ export default function StandingsTable({ leagueId }: { leagueId: number }) {
     let cancelled = false;
 
     fetch(`/api/league/${leagueId}`)
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`Standings request failed (${r.status})`);
+        return r.json();
+      })
       .then((data) => {
         if (!cancelled) {
           setStandings(data?.standings ?? []);
@@ -98,7 +101,6 @@ export default function StandingsTable({ leagueId }: { leagueId: number }) {
             const rank = entry?.rank ?? idx + 1;
             const isCL = rank <= 4;
             const isRelegation = rank >= (standings?.length ?? 20) - 2;
-            const desc = entry?.description ?? '';
 
             return (
               <motion.tr

@@ -4,6 +4,10 @@ import { execSync } from "child_process";
 
 try {
   const seedFile = path.resolve(process.cwd(), "scripts/seed.ts");
+  if (!fs.existsSync(seedFile)) {
+    console.error("Seed aborted: scripts/seed.ts does not exist.");
+    process.exit(1);
+  }
   const content = fs.readFileSync(seedFile, "utf-8");
 
   const forbiddenPatterns = [
@@ -21,6 +25,8 @@ try {
   }
 
 } catch (err: any) {
+  console.error("Seed aborted:", err?.message ?? err);
+  process.exit(1);
 }
 
 execSync("tsx --require dotenv/config scripts/seed.ts", { stdio: "inherit" });

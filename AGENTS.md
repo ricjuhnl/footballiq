@@ -17,8 +17,12 @@ for six European leagues. Tailwind + Radix/shadcn. No test suite, no CI — veri
 - `cp .env.example .env`; set `FOOTBALL_DATA_KEY`, `ODDS_API_KEY`, `DATABASE_URL` (keys are
   server-side only).
 - Postgres: `docker compose up -d db` (or whole stack with `docker compose up -d --build`;
-  the web image runs `prisma db push` on start).
-- Schema sync: `yarn prisma db push`. No migrations (gitignored).
+  the web image applies `prisma/migrations` via `prisma migrate deploy` on start, and
+  auto-baselines databases created by the legacy `db push` flow — see `docker-entrypoint.sh`).
+- Schema changes: `yarn prisma migrate dev --name <change>` — it runs `prisma generate` (see
+  output-path gotcha below on machines where that fails) and writes SQL into `prisma/migrations/`,
+  which is COMMITTED (no longer gitignored); deploy applies it with `migrate deploy`. Never add
+  migrations that destroy data while dev and production databases may be shared.
 - `prisma/schema.prisma` pins the Prisma client `output` to the absolute deploy path
   `/home/ubuntu/football_iq/nextjs_space/node_modules/.prisma/client`; `yarn prisma generate`
   on other machines fails (EACCES on /home/ubuntu). Workaround: temporarily set `output =

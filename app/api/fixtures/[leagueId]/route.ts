@@ -67,6 +67,6 @@ export async function GET(
     return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
   } catch (err: any) {
     console.error('Fixtures API error:', err?.message);
-    return NextResponse.json({ error: err?.message ?? 'Server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

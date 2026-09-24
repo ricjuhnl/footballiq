@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { CardSkeleton } from './loading-skeleton';
-import { AlertCircle, Calendar, TrendingUp, Zap, Target, BarChart3 } from 'lucide-react';
+import { AlertCircle, Calendar, Zap, Target, BarChart3 } from 'lucide-react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { SafeDate, SafeTime } from '@/components/safe-format';
@@ -69,7 +69,10 @@ export default function UpcomingPredictions({ leagueId }: { leagueId: number }) 
     let cancelled = false;
 
     fetch(`/api/fixtures/${leagueId}?type=upcoming`)
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`Predictions request failed (${r.status})`);
+        return r.json();
+      })
       .then((data) => {
         if (!cancelled) {
           setFixtures(data?.fixtures ?? []);

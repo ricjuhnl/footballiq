@@ -45,7 +45,10 @@ export default function BestTips() {
     let cancelled = false;
 
     fetch('/api/tips')
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`Tips request failed (${r.status})`);
+        return r.json();
+      })
       .then((data) => {
         if (!cancelled) {
           setTips(data?.tips ?? []);

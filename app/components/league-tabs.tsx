@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { LEAGUES, LEAGUE_IDS, type LeagueInfo } from '@/lib/constants';
+import { LEAGUES, LEAGUE_IDS } from '@/lib/constants';
 import StandingsTable from './standings-table';
 import RecentResults from './recent-results';
 import UpcomingPredictions from './upcoming-predictions';
 import BestTips from './best-tips';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Calendar, TrendingUp, Sparkles, Loader2 } from 'lucide-react';
+import { Trophy, Calendar, TrendingUp, Sparkles } from 'lucide-react';
 
 const tabs = [
   { id: 'standings', label: 'Standings', icon: Trophy },

@@ -43,7 +43,7 @@ COPY --from=builder /home/ubuntu/football_iq/nextjs_space/.next/standalone ./
 COPY --from=builder /home/ubuntu/football_iq/nextjs_space/.next/static ./nextjs_space/.next/static
 COPY --from=builder /home/ubuntu/football_iq/nextjs_space/prisma ./nextjs_space/prisma
 # The standalone trace contains @prisma/client and the generated .prisma/client (incl. the
-# query engine), but NOT the prisma CLI needed by the CMD's `db push`. These lines add the
+# query engine), but NOT the prisma CLI needed by the entrypoint's `migrate deploy`. These lines add the
 # CLI's dependency closure: prisma, @prisma/* (engines, config, fetch-engine, get-platform,
 # ...), the generated client, and esbuild/debug/ms. If a prisma upgrade breaks this, the
 # `--version` guard below fails the build with a missing-module error.
@@ -53,6 +53,7 @@ COPY --from=builder /home/ubuntu/football_iq/nextjs_space/node_modules/.prisma .
 COPY --from=builder /home/ubuntu/football_iq/nextjs_space/node_modules/esbuild ./nextjs_space/node_modules/esbuild
 COPY --from=builder /home/ubuntu/football_iq/nextjs_space/node_modules/esbuild-register ./nextjs_space/node_modules/esbuild-register
 COPY --from=builder /home/ubuntu/football_iq/nextjs_space/node_modules/@esbuild ./nextjs_space/node_modules/@esbuild
+COPY docker-entrypoint.sh ./nextjs_space/docker-entrypoint.sh
 
 WORKDIR /app/nextjs_space
 
@@ -61,5 +62,7 @@ RUN node node_modules/prisma/build/index.js --version
 
 EXPOSE 3000
 
-# On start, ensure the database schema exists, then launch the server.
-CMD ["sh", "-c", "node node_modules/prisma/build/index.js db push --skip-generate --accept-data-loss && node server.js"]
+# On start, apply committed SQL migrations (prisma/migrations), then launch the server.
+# The entrypoint baselines databases created by the old `db push` flow and `exec`s node
+# so it becomes PID 1 and receives SIGTERM (docker stop) for a graceful shutdown.
+CMD ["sh", "./docker-entrypoint.sh"]

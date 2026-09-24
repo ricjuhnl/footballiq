@@ -37,7 +37,10 @@ export default function RecentResults({ leagueId }: { leagueId: number }) {
     let cancelled = false;
 
     fetch(`/api/fixtures/${leagueId}?type=recent`)
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`Results request failed (${r.status})`);
+        return r.json();
+      })
       .then((data) => {
         if (!cancelled) {
           setFixtures(data?.fixtures ?? []);
