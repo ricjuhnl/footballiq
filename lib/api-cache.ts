@@ -20,6 +20,10 @@ interface MemEntry {
 
 const memoryCache = new Map<string, MemEntry>();
 
+// In-flight fetchers, so concurrent cache misses for the same key share one
+// upstream call instead of each burning a free-tier credit.
+const inFlight = new Map<string, Promise<any>>();
+
 function getMem(key: string): any | null {
   const entry = memoryCache.get(key);
   if (!entry) return null;
@@ -83,9 +87,20 @@ export async function cachedFetch<T>(key: string, fetcher: () => Promise<T>): Pr
     return db as T;
   }
 
-  const fresh = await fetcher();
-  const ttl = isEmptyData(fresh) ? EMPTY_CACHE_TTL_MS : CACHE_TTL_MS;
-  setMem(key, fresh, ttl);
-  await setDb(key, fresh, ttl);
-  return fresh;
+  const existing = inFlight.get(key);
+  if (existing) return existing as Promise<T>;
+
+  const pending = fetcher()
+    .then(async (fresh) => {
+      const ttl = isEmptyData(fresh) ? EMPTY_CACHE_TTL_MS : CACHE_TTL_MS;
+      setMem(key, fresh, ttl);
+      await setDb(key, fresh, ttl);
+      return fresh;
+    })
+    .finally(() => {
+      inFlight.delete(key);
+    });
+
+  inFlight.set(key, pending);
+  return pending as Promise<T>;
 }

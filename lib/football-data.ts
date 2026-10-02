@@ -41,33 +41,40 @@ function seasonLabelFrom(start?: string, end?: string): string | null {
 
 export async function getStandings(leagueId: number): Promise<StandingsResult> {
   const code = FD_COMPETITION_CODES[leagueId];
-  if (!code) return { standings: [], seasonLabel: null, currentMatchday: null };
+  if (!code) return emptyStandings();
 
   const url = `${BASE_URL}/competitions/${code}/standings`;
 
   return cachedFetch(url, () => fetchStandings(url));
 }
 
+function emptyStandings(): StandingsResult {
+  return { standings: [], seasonLabel: null, currentMatchday: null };
+}
+
 async function fetchStandings(url: string): Promise<StandingsResult> {
   const apiKey = process.env.FOOTBALL_DATA_KEY;
   if (!apiKey) {
     console.warn('FOOTBALL_DATA_KEY is not set');
-    return { standings: [], seasonLabel: null, currentMatchday: null };
+    return emptyStandings();
   }
 
-  const res = await fetch(url, {
-    headers: { 'X-Auth-Token': apiKey },
-    next: { revalidate: 86400 },
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, { headers: { 'X-Auth-Token': apiKey } });
+  } catch (err: any) {
+    console.warn('football-data.org fetch error:', err?.message);
+    return emptyStandings();
+  }
 
   if (res.status === 429) {
     console.warn('football-data.org rate limited, returning empty');
-    return { standings: [], seasonLabel: null, currentMatchday: null };
+    return emptyStandings();
   }
 
   if (!res.ok) {
     console.warn(`football-data.org error: ${res.status} ${res.statusText}`);
-    return { standings: [], seasonLabel: null, currentMatchday: null };
+    return emptyStandings();
   }
 
   const json = await res.json();

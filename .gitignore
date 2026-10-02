@@ -40,3 +40,4 @@ docker-compose.override.yml
 
 # Next.js per-checkout overrides (hosts etc. must stay out of shared config)
 next.config.user.json
+prisma/migrations/

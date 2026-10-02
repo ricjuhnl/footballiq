@@ -24,7 +24,7 @@ export async function getOdds(sportKey: string) {
 
     try {
       const url = `${BASE_URL}/sports/${sportKey}/odds/?apiKey=${apiKey}&regions=eu&markets=h2h,totals&oddsFormat=decimal`;
-      const res = await fetch(url, { next: { revalidate: 86400 } });
+      const res = await fetch(url);
 
       if (!res.ok) {
         console.warn(`Odds API (odds) error: ${res.status} for ${sportKey}`);
@@ -51,7 +51,7 @@ export async function getScores(sportKey: string, daysFrom: number = 3) {
 
     try {
       const url = `${BASE_URL}/sports/${sportKey}/scores/?apiKey=${apiKey}&daysFrom=${daysFrom}`;
-      const res = await fetch(url, { next: { revalidate: 86400 } });
+      const res = await fetch(url);
 
       if (!res.ok) {
         console.warn(`Odds API (scores) error: ${res.status} for ${sportKey}`);
@@ -148,23 +148,6 @@ export function parseEventOdds(event: any): MatchOdds | null {
     bookmaker: `${bookmakers.length} bookmakers (avg)`,
     bookmakerCount: bookmakers.length,
   };
-}
-
-// Legacy matcher kept for compatibility: find odds for a named fixture.
-export function findMatchOdds(oddsData: any[], homeTeam: string, awayTeam: string): MatchOdds | null {
-  if (!oddsData?.length) return null;
-  const normalize = (s: string) => (s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  const searchHome = normalize(homeTeam);
-  const searchAway = normalize(awayTeam);
-
-  for (const event of oddsData) {
-    const eventHome = normalize(event?.home_team ?? '');
-    const eventAway = normalize(event?.away_team ?? '');
-    const homeMatch = eventHome.includes(searchHome) || searchHome.includes(eventHome);
-    const awayMatch = eventAway.includes(searchAway) || searchAway.includes(eventAway);
-    if (homeMatch && awayMatch) return parseEventOdds(event);
-  }
-  return null;
 }
 
 // Build a normalized recent-results list from The Odds API /scores response.

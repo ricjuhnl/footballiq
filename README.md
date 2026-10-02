@@ -1,12 +1,13 @@
 # FootballIQ ⚽
 
-A football analysis dashboard covering six major European leagues — **Premier League, La Liga, Bundesliga, Serie A, Ligue 1, and Eredivisie**. It shows live league standings, recent results, and data-driven match predictions built from real bookmaker odds.
+A football analysis dashboard covering **8 European competitions** — Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Eredivisie, plus the Champions League and Europa League. It shows live league standings, recent results, and data-driven match predictions built from real bookmaker odds.
 
 ---
 
 ## Features
 
 - **Live standings** for the six domestic leagues plus the Champions League (current season, current matchday) with official club crests. The Europa League is included for predictions and results only (standings require a paid football-data.org plan).
+- **Best tips** — the strongest upcoming selections across all competitions, grouped into singles, doubles, and trebles.
 - **Recent results** sourced from a live scores feed.
 - **Match predictions** derived from live bookmaker odds — 1X2 (home / draw / away), Over/Under 2.5 goals, and Both Teams To Score — each with probability bars, a recommended bet, and a confidence badge.
 - Fast, dark-themed, fully responsive UI.
@@ -113,7 +114,7 @@ cp .env.example .env
 ```
 
 Edit `.env`:
-- Set the three API keys.
+- Set the two API keys (`FOOTBALL_DATA_KEY`, `ODDS_API_KEY`).
 - Set `DATABASE_URL` to point at your local database, e.g.
   `postgresql://postgres:postgres@localhost:5432/football_iq?connect_timeout=15`
 
@@ -125,10 +126,14 @@ yarn install
 
 ### 5. Set up the database schema
 
+Schema changes live in committed SQL migrations under `prisma/migrations/`:
+
 ```bash
 yarn prisma generate
-yarn prisma db push
+yarn prisma migrate dev   # applies all committed migrations
 ```
+
+(For a schema change: `yarn prisma migrate dev --name <change>` — this also regenerates the Prisma client.)
 
 ### 6. Run the app
 
@@ -157,7 +162,8 @@ Open **http://localhost:3000**.
 | `yarn build` | Create a production build |
 | `yarn start` | Run the production build |
 | `yarn lint` | Run the linter |
-| `yarn prisma db push` | Sync the database schema |
+| `yarn typecheck` | Run TypeScript (`tsc --noEmit`) |
+| `yarn prisma migrate dev` | Apply committed schema migrations (creates new ones with `--name`) |
 
 ---
 
@@ -167,20 +173,24 @@ Open **http://localhost:3000**.
 app/                    Pages and API routes
   api/league/[id]       Standings endpoint (football-data.org)
   api/fixtures/[id]     Predictions & recent results (The Odds API)
-  components/           UI: standings table, predictions, results
+  api/tips              Best-tips endpoint (all competitions)
+  components/           UI: standings table, predictions, results, tips
 lib/
+  api-cache.ts          Shared cache: memory -> Postgres (ApiCache) -> provider
   football-data.ts      football-data.org client (standings)
-  odds-api.ts           The Odds API client (odds, scores, predictions)
-  predictions.ts        Prediction engine
+  odds-api.ts           The Odds API client (odds, scores)
+  predictions.ts        Prediction engine (bookmaker-odds based)
+  tips.ts               Tip selection & grouping
   constants.ts          League configuration
 prisma/schema.prisma    Database schema (API cache table)
+prisma/migrations/      Committed SQL migrations
 ```
 
 ---
 
 ## Troubleshooting
 
-- **Standings/predictions are empty:** double-check the API keys in `.env`. Free tiers have request limits — if you hit one, wait a while and refresh. The app caches responses for one hour to reduce calls.
+- **Standings/predictions are empty:** double-check the API keys in `.env`. Free tiers have request limits — if you hit one, wait a while and refresh. The app caches successful responses for 24 hours (empty/failed responses for 1 hour) to reduce calls.
 - **Database connection errors:** make sure Postgres is running and `DATABASE_URL` matches its host, port, user, password, and database name. Inside Docker Compose the host is `db`; running natively it is `localhost`.
 - **Port 3000 already in use:** stop whatever is using it, or run the dev server on another port with `yarn dev -p 3001`.
 

@@ -5,8 +5,6 @@ import { getOdds, getScores, parseEventOdds, buildRecentResults, hashId } from '
 import { generatePrediction } from '@/lib/predictions';
 import { LEAGUES } from '@/lib/constants';
 
-const EMPTY_FORM = { played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0 };
-
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ leagueId: string }> }
@@ -27,7 +25,7 @@ export async function GET(
     if (type === 'recent') {
       const scores = await getScores(league.sportKey, 3);
       const fixtures = buildRecentResults(scores);
-      return NextResponse.json({ fixtures, stale: false });
+      return NextResponse.json({ fixtures });
     }
 
     // ---- UPCOMING FIXTURES + PREDICTIONS ----
@@ -36,6 +34,8 @@ export async function GET(
       const oddsData = await getOdds(league.sportKey);
 
       const now = Date.now();
+      // Events without usable bookmaker odds are skipped: with no odds there is
+      // no prediction to show.
       const fixtures = (oddsData ?? [])
         .filter((ev: any) => new Date(ev?.commence_time ?? 0).getTime() >= now - 2 * 60 * 60 * 1000)
         .sort(
@@ -43,9 +43,10 @@ export async function GET(
             new Date(a?.commence_time ?? 0).getTime() - new Date(b?.commence_time ?? 0).getTime()
         )
         .slice(0, 12)
-        .map((ev: any) => {
+        .flatMap((ev: any) => {
           const odds = parseEventOdds(ev);
-          const prediction = generatePrediction(odds, { ...EMPTY_FORM }, { ...EMPTY_FORM });
+          const prediction = generatePrediction(odds);
+          if (!prediction) return [];
           return {
             fixture: {
               id: hashId(ev?.id ?? `${ev?.home_team}-${ev?.away_team}-${ev?.commence_time}`),

@@ -89,7 +89,7 @@ export default function BestTips() {
           <div>
             <h2 className="font-display text-xl font-bold tracking-tight">Best Tips</h2>
             <p className="text-xs text-muted-foreground">
-              Top upcoming picks across all 6 leagues, split into separate tips of max 2-3 selections
+              Top upcoming picks across all 8 competitions, split into separate tips of max 2-3 selections
             </p>
           </div>
         </div>

@@ -56,27 +56,3 @@ export function SafeTime({ date, options, locale = DEFAULT_LOCALE, localize = fa
     </span>
   )
 }
-
-type SafeNumberProps = {
-  value: number
-  options?: Intl.NumberFormatOptions
-  locale?: string
-  /** ISO 4217 code, e.g. 'USD' — shorthand for style: 'currency'. */
-  currency?: string
-  localize?: boolean
-  className?: string
-}
-
-export function SafeNumber({ value, options, locale = DEFAULT_LOCALE, currency, localize = false, className }: SafeNumberProps) {
-  const mounted = useMounted()
-  const useLocal = localize && mounted
-  const text = value.toLocaleString(useLocal ? undefined : locale, {
-    ...(currency ? { style: 'currency' as const, currency } : {}),
-    ...options,
-  })
-  return (
-    <span suppressHydrationWarning className={className}>
-      {text}
-    </span>
-  )
-}

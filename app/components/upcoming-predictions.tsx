@@ -218,13 +218,6 @@ export default function UpcomingPredictions({ leagueId }: { leagueId: number }) 
                       Prediction from live bookmaker odds (1X2 &amp; O/U 2.5)
                     </div>
                   )}
-
-                  {!pred?.oddsAvailable && (
-                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                      <BarChart3 className="h-3 w-3" />
-                      Odds unavailable — prediction based on form only
-                    </div>
-                  )}
                 </>
               ) : (
                 <div className="text-center text-xs text-muted-foreground py-4">

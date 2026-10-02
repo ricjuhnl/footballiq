@@ -11,9 +11,9 @@ export async function GET() {
   try {
     const now = Date.now();
 
-    // Best tips span all six leagues. Only the first upcoming matches count:
+    // Best tips span all eight competitions. Only the first upcoming matches count:
     // kickoff no earlier than 2h ago (same grace as the fixtures route) and no
-    // further than 7 days ahead (next matchday only).
+    // further than 3 days ahead (rolling 3-day window, see TIP_MAX_HOURS_AHEAD).
     const leagues = await Promise.all(
       LEAGUE_IDS.map(async (leagueId) => {
         const league = LEAGUES[leagueId];

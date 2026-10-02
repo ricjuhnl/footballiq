@@ -1,7 +1,7 @@
 # FootballIQ (nextjs_space)
 
 Next.js 16 App Router + React 19 + TypeScript dashboard (standings, predictions, tips)
-for six European leagues. Tailwind + Radix/shadcn. No test suite, no CI — verify with
+for 8 European competitions. Tailwind + Framer Motion + sonner. No test suite, no CI — verify with
 `yarn lint`, `yarn eslint -c eslint.ssr.config.mjs .`, `yarn tsc --noEmit`, and running the app.
 
 ## Commands (Yarn 1 classic, Node >= 20.9)
@@ -19,15 +19,15 @@ for six European leagues. Tailwind + Radix/shadcn. No test suite, no CI — veri
 - Postgres: `docker compose up -d db` (or whole stack with `docker compose up -d --build`;
   the web image applies `prisma/migrations` via `prisma migrate deploy` on start, and
   auto-baselines databases created by the legacy `db push` flow — see `docker-entrypoint.sh`).
-- Schema changes: `yarn prisma migrate dev --name <change>` — it runs `prisma generate` (see
-  output-path gotcha below on machines where that fails) and writes SQL into `prisma/migrations/`,
-  which is COMMITTED (no longer gitignored); deploy applies it with `migrate deploy`. Never add
-  migrations that destroy data while dev and production databases may be shared.
-- `prisma/schema.prisma` pins the Prisma client `output` to the absolute deploy path
-  `/home/ubuntu/football_iq/nextjs_space/node_modules/.prisma/client`; `yarn prisma generate`
-  on other machines fails (EACCES on /home/ubuntu). Workaround: temporarily set `output =
-  "../node_modules/.prisma/client"`, run `yarn prisma generate`, then restore the schema —
-  `yarn build` needs the generated client to import `lib/db.ts`.
+- Schema changes: `yarn prisma migrate dev --name <change>` — it runs `prisma generate` and
+  writes SQL into `prisma/migrations/`, which is COMMITTED (no longer gitignored); deploy applies
+  it with `migrate deploy`. Never add migrations that destroy data while dev and production
+  databases may be shared.
+- `prisma/schema.prisma` uses a RELATIVE Prisma client `output`
+  (`../node_modules/.prisma/client`), so `yarn prisma generate` works on any machine and
+  `yarn build` finds the generated client for `lib/db.ts`. In the Docker build the builder
+  WORKDIR is `/home/ubuntu/football_iq/nextjs_space`, so the relative path resolves to the same
+  node_modules location as the old absolute pin — don't change it back.
 - Seeding: `yarn prisma db seed` → `scripts/safe-seed.ts` aborts if `scripts/seed.ts` contains
   `prisma.*delete*` (dev and production databases can be shared).
 
@@ -40,7 +40,9 @@ for six European leagues. Tailwind + Radix/shadcn. No test suite, no CI — veri
   provider. TTL 24 h (1 h for empty/failed responses). Free-tier rate limits are strict — never
   add code paths that bypass or force-refresh this cache.
 - Europa League: predictions/results only; standings need a paid football-data.org plan.
-- `components/` = shared shadcn UI + providers; `app/components/` = feature components.
+- `components/` = shared UI helpers (safe-format, client-only, theme provider, sonner toaster);
+  `app/components/` = feature components. The bulk of the shadcn UI kit was removed; re-add
+  individual components with `npx shadcn add <name>` if needed.
 - `STYLE_GUIDE.md` is the UI contract (fonts, design tokens, layout rules) — read before UI work.
 
 ## Gotchas

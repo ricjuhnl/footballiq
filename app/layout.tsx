@@ -11,16 +11,16 @@ const jakartaSans = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-di
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' })
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.SITE_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000'),
   title: 'FootballIQ — Smart Football Analysis',
-  description: 'Live standings, results, upcoming fixtures and AI-powered match predictions for Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Eredivisie.',
+  description: 'Live standings, results, upcoming fixtures and AI-powered match predictions across Europe\'s top leagues and European competitions.',
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
   },
   openGraph: {
     title: 'FootballIQ — Smart Football Analysis',
-    description: 'Live standings, results, upcoming fixtures and AI-powered match predictions across 6 European leagues.',
+    description: 'Live standings, results, upcoming fixtures and AI-powered match predictions across 8 European competitions.',
     images: ['/og-image.png'],
   },
 }

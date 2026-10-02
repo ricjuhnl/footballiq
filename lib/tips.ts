@@ -7,9 +7,6 @@ export const TIP_MIN_ODDS = 1.4; // selection needs decimal odds higher than thi
 export const TIP_MAX_HOURS_AHEAD = 3 * 24; // only the first upcoming matchday (rolling 3-day window)
 export const TIP_MAX_SELECTIONS = 12; // keep only the top-N picks across all leagues
 export const TIP_MAX_PER_GROUP = 3; // each separate tip carries max 2-3 selections
-export const TIP_MIN_PER_GROUP = 2;
-
-const EMPTY_FORM = { played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0 };
 
 export type MarketCode = 'home' | 'draw' | 'away' | 'over25';
 
@@ -23,8 +20,8 @@ export interface TipSelection {
   awayTeam: string;
   market: string;
   marketCode: MarketCode;
-  probability: number; // FootballIQ probability (%, > 65)
-  odds: number; // decimal odds (> 1.50)
+  probability: number; // FootballIQ probability (%, > 58)
+  odds: number; // decimal odds (> 1.40)
 }
 
 export interface Tip {
@@ -55,7 +52,7 @@ const MARKET_DEFS: { code: MarketCode; label: string }[] = [
 ];
 
 // Extract the markets of a match that clear the quality bar:
-// probability > 65% AND decimal odds > 1.50.
+// probability > 58% AND decimal odds > 1.40.
 export function buildMatchCandidates(prediction: any): MarketCandidate[] {
   const map: Record<MarketCode, { pct: number; odds: number }> = {
     home: { pct: prediction?.homeWinPct ?? 0, odds: prediction?.homeOdds ?? 0 },
@@ -99,7 +96,7 @@ function pickLabel(size: number): Tip['label'] {
 }
 
 // Scan every league's upcoming odds and rank the selections that clear
-// probability > 65% and odds > 1.50, then split them into separate tips of
+// probability > 58% and odds > 1.40, then split them into separate tips of
 // max 2-3 selections (one market per match, best market only).
 export function buildTips(leagues: LeagueEvents[]): Tip[] {
   const all: TipSelection[] = [];
@@ -112,7 +109,8 @@ export function buildTips(leagues: LeagueEvents[]): Tip[] {
       const odds = parseEventOdds(ev);
       if (!odds) continue;
 
-      const prediction = generatePrediction(odds, { ...EMPTY_FORM }, { ...EMPTY_FORM });
+      const prediction = generatePrediction(odds);
+      if (!prediction) continue;
       const candidates = buildMatchCandidates(prediction)
         .sort(
           (a, b) =>
